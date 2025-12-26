@@ -5,16 +5,17 @@ export class Firework {
     this.scene = scene;
     this.onExplode = onExplode;
 
-    // ====== STATE ======
+    // ===== STATE =====
     this.state = "launch";
     this.dead = false;
+    this.exploded = false;
 
-    // ====== LAUNCH ======
+    // ===== LAUNCH PHYSICS =====
     this.launchSpeed = 25 + Math.random() * 10;
     this.velocity = new THREE.Vector3(0, this.launchSpeed, 0);
     this.gravity = -18;
 
-    // ====== ROCKET ======
+    // ===== ROCKET =====
     const geo = new THREE.SphereGeometry(0.15, 8, 8);
     const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     this.rocket = new THREE.Mesh(geo, mat);
@@ -22,8 +23,9 @@ export class Firework {
 
     this.explodeHeight = 30 + Math.random() * 15;
 
-    // ====== PARTICLES ======
+    // ===== PARTICLES =====
     this.particles = null;
+    this.velocities = [];
     this.life = 0;
     this.maxLife = 2.5;
   }
@@ -36,17 +38,37 @@ export class Firework {
   update(delta = 0.016) {
     if (this.dead) return;
 
+    // ===== ROCKET BAY LÊN =====
     if (this.state === "launch") {
       this.velocity.y += this.gravity * delta;
       this.rocket.position.addScaledVector(this.velocity, delta);
 
-      if (this.velocity.y <= 0 || this.rocket.position.y >= this.explodeHeight) {
-        this.explode();
+      if (
+        this.velocity.y <= 0 ||
+        this.rocket.position.y >= this.explodeHeight
+      ) {
+        if (!this.exploded) {
+          this.exploded = true;
+          this.explode();
+        }
       }
     }
 
+    // ===== PARTICLES NỔ =====
     if (this.state === "explode") {
       this.life += delta;
+
+      const positions = this.particles.geometry.attributes.position.array;
+
+      for (let i = 0; i < this.velocities.length; i++) {
+        this.velocities[i].y += this.gravity * 0.25 * delta;
+
+        positions[i * 3]     += this.velocities[i].x * delta;
+        positions[i * 3 + 1] += this.velocities[i].y * delta;
+        positions[i * 3 + 2] += this.velocities[i].z * delta;
+      }
+
+      this.particles.geometry.attributes.position.needsUpdate = true;
       this.particles.material.opacity = 1 - this.life / this.maxLife;
 
       if (this.life >= this.maxLife) {
@@ -60,12 +82,14 @@ export class Firework {
     this.state = "explode";
     this.scene.remove(this.rocket);
 
-    // 🔊 CALLBACK NỔ
+    // 🔊 PHÁT ÂM THANH (DUY NHẤT Ở ĐÂY)
     if (this.onExplode) this.onExplode();
 
     const count = 200;
     const positions = new Float32Array(count * 3);
-    const velocities = [];
+    this.velocities = [];
+
+    const origin = this.rocket.position.clone();
 
     for (let i = 0; i < count; i++) {
       const theta = Math.random() * Math.PI * 2;
@@ -78,11 +102,11 @@ export class Firework {
         Math.sin(phi) * Math.sin(theta)
       ).multiplyScalar(speed);
 
-      velocities.push(v);
+      this.velocities.push(v);
 
-      positions[i * 3] = this.rocket.position.x;
-      positions[i * 3 + 1] = this.rocket.position.y;
-      positions[i * 3 + 2] = this.rocket.position.z;
+      positions[i * 3]     = origin.x;
+      positions[i * 3 + 1] = origin.y;
+      positions[i * 3 + 2] = origin.z;
     }
 
     const geo = new THREE.BufferGeometry();
@@ -93,13 +117,12 @@ export class Firework {
       color: new THREE.Color().setHSL(Math.random(), 1, 0.6),
       transparent: true,
       opacity: 1,
-      depthWrite: false
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
     });
 
     this.particles = new THREE.Points(geo, mat);
     this.scene.add(this.particles);
-
-    this.velocities = velocities;
   }
 
   // =====================
@@ -107,9 +130,11 @@ export class Firework {
     if (this.dead) return;
     this.dead = true;
 
-    this.scene.remove(this.particles);
-    this.particles.geometry.dispose();
-    this.particles.material.dispose();
+    if (this.particles) {
+      this.scene.remove(this.particles);
+      this.particles.geometry.dispose();
+      this.particles.material.dispose();
+    }
   }
 
   isDead() {
