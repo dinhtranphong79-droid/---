@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <title>Happy New Year 2026</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+  <!-- TAP TO START (BẮT BUỘC CHO iOS) -->
+  <div id="startScreen">
+    <div class="startText">
+      Tap to Start 🎆<br/>
+      Happy New Year 2026
+    </div>
+  </div>
+
+  <!-- CANVAS THREE.JS -->
+  <canvas id="webgl"></canvas>
+
+  <!-- THREE.JS CDN (ổn định, iOS chạy tốt) -->
+  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+  <script src="./main.js"></script>
+
+</body>
+</html>
