@@ -1,4 +1,5 @@
 import { Firework } from "./js/fireworks.js";
+import { initAudio, playFireworkSound } from "./js/audio.js";
 
 let scene, camera, renderer;
 let clock;
@@ -16,13 +17,16 @@ document.getElementById("startScreen").addEventListener("click", async () => {
   if (started) return;
   started = true;
 
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  await audioCtx.resume();
+ audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+await audioCtx.resume();
 
-  document.getElementById("startScreen").style.display = "none";
+initAudio(audioCtx); // 🔊 KHỞI TẠO ÂM THANH (QUAN TRỌNG)
 
-  init();
-  animate();
+document.getElementById("startScreen").style.display = "none";
+
+init();
+animate();
+
 });
 
 // =====================
@@ -84,7 +88,11 @@ function launchFirework() {
     (Math.random() - 0.5) * 60
   );
 
-  fireworks.push(fw);
+fireworks.push(fw);
+
+// 🔊 NỔ PHÁO (sync từng quả)
+playFireworkSound();
+
 }
 
 // =====================
