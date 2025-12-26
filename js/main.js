@@ -1,6 +1,7 @@
 import { Firework } from "./js/fireworks.js";
 import { initAudio, playFireworkSound } from "./js/audio.js";
 
+let raycaster, mouse;
 let scene, camera, renderer;
 let clock;
 let started = false;
@@ -74,6 +75,11 @@ function init() {
   scene.add(mountains);
 
   window.addEventListener("resize", onResize);
+  raycaster = new THREE.Raycaster();
+mouse = new THREE.Vector2();
+
+window.addEventListener("pointerdown", onPointerDown);
+
 }
 
 // =====================
@@ -82,18 +88,52 @@ function init() {
 function launchFirework() {
   const fw = new Firework(scene);
 
-  fw.points.position.set(
+  fw.setPosition(
     (Math.random() - 0.5) * 60,
-    Math.random() * 25 + 25,
+    0,
     (Math.random() - 0.5) * 60
   );
 
-fireworks.push(fw);
+  fw.explodeHeight = Math.random() * 20 + 25;
 
-// 🔊 NỔ PHÁO (sync từng quả)
-playFireworkSound();
-
+  fireworks.push(fw);
+  playFireworkSound();
 }
+
+function spawnFireworkAt(target) {
+  const fw = new Firework(scene);
+
+  fw.setPosition(
+    target.x,
+    0,
+    target.z
+  );
+
+  fw.explodeHeight = target.y;
+
+  fireworks.push(fw);
+  playFireworkSound();
+}
+
+function onPointerDown(event) {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  const skyPlane = new THREE.Plane(
+    new THREE.Vector3(0, -1, 0),
+    25
+  );
+
+  const hitPoint = new THREE.Vector3();
+
+  if (raycaster.ray.intersectPlane(skyPlane, hitPoint)) {
+    spawnFireworkAt(hitPoint);
+  }
+}
+
+
 
 // =====================
 // RESIZE
