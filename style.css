@@ -1,3 +1,6 @@
+/* =====================
+   RESET & BASIC
+===================== */
 * {
   margin: 0;
   padding: 0;
@@ -9,13 +12,15 @@ html, body {
   height: 100%;
   background: black;
   overflow: hidden;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Tap to Start */
+/* =====================
+   START SCREEN (TAP TO START)
+===================== */
 #startScreen {
   position: fixed;
-  inset: 0;
+  inset: 0; /* top:0; right:0; bottom:0; left:0 */
   background: black;
   color: white;
   display: flex;
@@ -23,17 +28,47 @@ html, body {
   justify-content: center;
   z-index: 10;
   text-align: center;
+  transition: opacity 0.8s ease;
+}
+
+#startScreen.hide {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .startText {
-  font-size: 24px;
+  font-size: clamp(18px, 4vw, 36px); /* responsive font */
   line-height: 1.4;
-  opacity: 0.9;
+  opacity: 0.95;
+  text-shadow: 
+    0 0 8px #fff, 
+    0 0 16px #ffdd33, 
+    0 0 24px #ff8800;
+  animation: pulse 1.5s infinite alternate;
 }
 
-/* Canvas */
+/* Pulse animation cho start text */
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.9; }
+  100% { transform: scale(1.05); opacity: 1; }
+}
+
+/* =====================
+   CANVAS
+===================== */
 #webgl {
   width: 100vw;
   height: 100vh;
   display: block;
+  touch-action: none; /* tránh gesture zoom trên mobile */
+}
+
+/* =====================
+   OPTIONAL: HAPPY NEW YEAR TEXT
+   (Glow & animation trên 3D mesh được hỗ trợ bởi Three.js)
+===================== */
+.newYearText {
+  font-family: system-ui, sans-serif;
+  color: #ffd700;
+  text-shadow: 0 0 8px #fff, 0 0 16px #ffdd33, 0 0 24px #ff8800;
 }
