@@ -1,9 +1,12 @@
+import { Firework } from "./js/fireworks.js";
+
 let scene, camera, renderer;
 let clock;
 let started = false;
 let audioCtx;
+const fireworks = [];
+let fireworkTimer = 0;
 
-// Detect iOS
 const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 // =====================
@@ -13,7 +16,6 @@ document.getElementById("startScreen").addEventListener("click", async () => {
   if (started) return;
   started = true;
 
-  // AudioContext cho iOS
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   await audioCtx.resume();
 
@@ -28,10 +30,8 @@ document.getElementById("startScreen").addEventListener("click", async () => {
 // =====================
 function init() {
   clock = new THREE.Clock();
-
   scene = new THREE.Scene();
 
-  // CAMERA
   camera = new THREE.PerspectiveCamera(
     60,
     window.innerWidth / window.innerHeight,
@@ -41,7 +41,6 @@ function init() {
   camera.position.set(0, 20, 60);
   camera.lookAt(0, 0, 0);
 
-  // RENDERER
   renderer = new THREE.WebGLRenderer({
     canvas: document.getElementById("webgl"),
     antialias: !isIOS,
@@ -51,7 +50,6 @@ function init() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setClearColor(0x000000);
 
-  // LIGHTS
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
   scene.add(ambientLight);
 
@@ -59,7 +57,6 @@ function init() {
   moonLight.position.set(50, 100, -50);
   scene.add(moonLight);
 
-  // PLACEHOLDER – NÚI (LOW POLY)
   const mountainGeo = new THREE.PlaneGeometry(200, 200, 20, 20);
   mountainGeo.rotateX(-Math.PI / 2);
 
@@ -72,8 +69,22 @@ function init() {
   mountains.position.y = -5;
   scene.add(mountains);
 
-  // RESIZE
   window.addEventListener("resize", onResize);
+}
+
+// =====================
+// FIREWORK SPAWN
+// =====================
+function launchFirework() {
+  const fw = new Firework(scene);
+
+  fw.points.position.set(
+    (Math.random() - 0.5) * 60,
+    Math.random() * 25 + 25,
+    (Math.random() - 0.5) * 60
+  );
+
+  fireworks.push(fw);
 }
 
 // =====================
@@ -91,10 +102,24 @@ function onResize() {
 function animate() {
   requestAnimationFrame(animate);
 
+  const delta = clock.getDelta();
   const elapsed = clock.getElapsedTime();
 
-  // Camera chuyển động rất nhẹ (cinematic)
   camera.position.z = 60 + Math.sin(elapsed * 0.2) * 1.5;
+
+  fireworkTimer += delta;
+  if (fireworkTimer > 1.2) {
+    launchFirework();
+    fireworkTimer = 0;
+  }
+
+  for (let i = fireworks.length - 1; i >= 0; i--) {
+    fireworks[i].update();
+    if (fireworks[i].isDead()) {
+      fireworks[i].dispose();
+      fireworks.splice(i, 1);
+    }
+  }
 
   renderer.render(scene, camera);
 }
