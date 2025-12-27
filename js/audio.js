@@ -9,7 +9,7 @@ let explosionBuffer = null;
 export async function initAudio(ctx) {
   audioCtx = ctx;
 
-  const response = await fetch("assets/firework.mp3");
+ const response = await fetch("../assets/audio/firework.mp3");
   const arrayBuffer = await response.arrayBuffer();
   explosionBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 }
