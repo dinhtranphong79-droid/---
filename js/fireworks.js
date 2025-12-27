@@ -1,9 +1,14 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
 
 export class Firework {
-  constructor(scene, onExplode) {
+  constructor(scene) {
     this.scene = scene;
-    this.onExplode = onExplode;
+  }
+  update() {}
+  isDead() { return false; }
+  dispose() {}
+}
+
 
     // ===== STATE =====
     this.state = "launch";
