@@ -29,13 +29,14 @@ document.getElementById("startScreen").addEventListener("click", async () => {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   await audioCtx.resume();
 
-  initAudio(audioCtx); // 🔊 Init sound
+  await initAudio(audioCtx); // ✅ BẮT BUỘC await
 
   document.getElementById("startScreen").style.display = "none";
 
   initScene();
   animate();
 });
+
 
 // =====================
 // INIT SCENE
