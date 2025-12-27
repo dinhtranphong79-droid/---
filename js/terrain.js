@@ -10,7 +10,8 @@ function noise(x, z) {
 /**
  * Tạo địa hình Lũng Cú dạng thung lũng
  */
-export function createLungCuTerrain(scene) {
+export function createLungCuTerrain() {
+
   const size = 400;
   const segments = 200;
 
@@ -49,7 +50,7 @@ export function createLungCuTerrain(scene) {
   const terrain = new THREE.Mesh(geometry, material);
   terrain.receiveShadow = true;
 
-  scene.add(terrain);
+
 
   return terrain;
 }
