@@ -4,6 +4,7 @@ import { TextGeometry } from "https://unpkg.com/three@0.158.0/examples/jsm/geome
 import { Firework } from "./fireworks.js";
 import { initAudio, playFireworkSound } from "./audio.js";
 import { createLungCuTerrain } from "./terrain.js";
+import { createFarMountains } from "./terrainFar.js";
 
 
 
@@ -18,6 +19,8 @@ let newYearText = null;
 let phase = 1;
 let showTime = 0;
 let finaleCount = 0;
+let farMountains;
+
 
 const MAX_FIREWORKS = 80;
 const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -61,7 +64,7 @@ function initScene() {
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  scene.fog = new THREE.Fog(0x020408, 40, 160);
+  scene.fog = new THREE.Fog(0x020408, 60, 260);
 renderer.setClearColor(0x020408);
 
 
@@ -73,8 +76,12 @@ renderer.setClearColor(0x020408);
   moonLight.position.set(50, 100, -50);
   scene.add(moonLight);
 
- const terrain = createLungCuTerrain();
+const terrain = createLungCuTerrain();
 scene.add(terrain);
+
+farMountains = createFarMountains();
+scene.add(farMountains);
+
 
 
   // Raycaster for pointer
@@ -203,6 +210,10 @@ function animate() {
     newYearText.position.y = 25 + Math.sin(clock.elapsedTime * 2) * 0.5;
     newYearText.rotation.y += 0.003;
   }
+if (farMountains) {
+  farMountains.position.x = camera.position.x * 0.2;
+  farMountains.position.z = -180 + camera.position.z * 0.1;
+}
 
   spawnShowFireworks(delta);
 
