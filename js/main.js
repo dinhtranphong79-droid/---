@@ -3,6 +3,7 @@ import { FontLoader } from "https://unpkg.com/three@0.158.0/examples/jsm/loaders
 import { TextGeometry } from "https://unpkg.com/three@0.158.0/examples/jsm/geometries/TextGeometry.js";
 import { Firework } from "./fireworks.js";
 import { initAudio, playFireworkSound } from "./audio.js";
+import { createLungCuTerrain } from "./terrain.js";
 
 
 
@@ -60,7 +61,9 @@ function initScene() {
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setClearColor(0x000000);
+  scene.fog = new THREE.Fog(0x020408, 40, 160);
+renderer.setClearColor(0x020408);
+
 
   // Lights
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
@@ -70,13 +73,9 @@ function initScene() {
   moonLight.position.set(50, 100, -50);
   scene.add(moonLight);
 
-  // Mountains
-  const mountainGeo = new THREE.PlaneGeometry(200, 200, 20, 20);
-  mountainGeo.rotateX(-Math.PI / 2);
-  const mountainMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, flatShading: true });
-  const mountains = new THREE.Mesh(mountainGeo, mountainMat);
-  mountains.position.y = -5;
-  scene.add(mountains);
+ const terrain = createLungCuTerrain();
+scene.add(terrain);
+
 
   // Raycaster for pointer
   raycaster = new THREE.Raycaster();
