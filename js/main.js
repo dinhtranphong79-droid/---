@@ -1,6 +1,6 @@
 import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
-import { Firework } from "./js/fireworks.js";
-import { initAudio, playFireworkSound } from "./js/audio.js";
+import { Firework } from "./fireworks.js";
+import { initAudio, playFireworkSound } from "./audio.js";
 
 
 
