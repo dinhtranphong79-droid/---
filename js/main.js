@@ -1,4 +1,6 @@
 import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
+import { FontLoader } from "https://unpkg.com/three@0.158.0/examples/jsm/loaders/FontLoader.js";
+import { TextGeometry } from "https://unpkg.com/three@0.158.0/examples/jsm/geometries/TextGeometry.js";
 import { Firework } from "./fireworks.js";
 import { initAudio, playFireworkSound } from "./audio.js";
 
@@ -223,9 +225,9 @@ function animate() {
 function showHappyNewYear() {
   if (newYearText) return;
 
-  const loader = new THREE.FontLoader();
+ const loader = new FontLoader();
   loader.load("https://threejs.org/examples/fonts/helvetiker_bold.typeface.json", (font) => {
-    const geo = new THREE.TextGeometry("HAPPY NEW YEAR", {
+    const geo = new TextGeometry("HAPPY NEW YEAR", {
       font,
       size: 4,
       height: 1,
