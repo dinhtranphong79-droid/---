@@ -1,29 +1,33 @@
 // js/audio.js
+
 let audioCtx;
-let fireworkBuffer = null;
+let explosionBuffer = null;
 
-export function initAudio(context) {
-  audioCtx = context;
-  loadFireworkSound();
-}
+// =====================
+// INIT AUDIO (gọi sau Tap to Start)
+// =====================
+export async function initAudio(ctx) {
+  audioCtx = ctx;
 
-async function loadFireworkSound() {
-  const response = await fetch("./assets/sounds/firework.mp3");
+  // Load sound
+  const response = await fetch("./assets/firework.mp3");
   const arrayBuffer = await response.arrayBuffer();
-  fireworkBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+  explosionBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 }
 
-export function playFireworkSound() {
-  if (!audioCtx || !fireworkBuffer) return;
+// =====================
+// PLAY SOUND (sync pháo)
+// =====================
+export function playFireworkSound(volume = 0.6) {
+  if (!audioCtx || !explosionBuffer) return;
 
   const source = audioCtx.createBufferSource();
-  const gainNode = audioCtx.createGain();
+  const gain = audioCtx.createGain();
 
-  gainNode.gain.value = 0.6; // âm lượng pháo
+  gain.gain.value = volume;
 
-  source.buffer = fireworkBuffer;
-  source.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
-
-  source.start(0);
+  source.buffer = explosionBuffer;
+  source.connect(gain).connect(audioCtx.destination);
+  source.start();
 }
+
