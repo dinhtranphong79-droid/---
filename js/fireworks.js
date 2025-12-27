@@ -3,12 +3,6 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
 export class Firework {
   constructor(scene) {
     this.scene = scene;
-  }
-  update() {}
-  isDead() { return false; }
-  dispose() {}
-}
-
 
     // ===== STATE =====
     this.state = "launch";
@@ -86,9 +80,6 @@ export class Firework {
   explode() {
     this.state = "explode";
     this.scene.remove(this.rocket);
-
-    // 🔊 PHÁT ÂM THANH (DUY NHẤT Ở ĐÂY)
-    if (this.onExplode) this.onExplode();
 
     const count = 200;
     const positions = new Float32Array(count * 3);
