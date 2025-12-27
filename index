@@ -20,7 +20,7 @@
   <canvas id="webgl"></canvas>
 
   <!-- THREE.JS CDN (ổn định, iOS chạy tốt) -->
-  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+  
   <script type="module" src="./js/main.js"></script>
 
 </body>
