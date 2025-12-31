@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>... </title>
+<title>---</title>
 
 <style>
 html,body{
@@ -23,8 +23,26 @@ html,body{
   max-height:100vh;
   max-width:calc(100vh * 9 / 16);
   overflow:hidden;
-  animation: bgAnimation 6s infinite alternate; /* thêm animation */
+  background:#000;
 }
+
+/* lớp nền động */
+#stage::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: linear-gradient(to top, #000000, #001f3f, #220066);
+  animation: bgAnimation 8s ease-in-out infinite;
+  z-index:0;
+}
+
+/* canvas + chữ nằm trên nền */
+canvas,
+#textOverlay{
+  position:relative;
+  z-index:1;
+}
+
 
 /* Gradient animation cho bầu trời */
 @keyframes bgAnimation {
@@ -81,26 +99,44 @@ canvas{
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 const textBox = document.getElementById("textOverlay");
+const stage = document.getElementById("stage");
 
 let W=0,H=0;
-const stars = [];
+const starsFar = [];
+const starsNear = [];
+function createStar(layer) {
+  return {
+    x: Math.random() * W,
+    y: Math.random() * H,
+    r: layer === "far" ? Math.random() * 1.2 : Math.random() * 2,
+    opacity: Math.random(),
+    vx: layer === "far" ? (Math.random() - 0.5) * 0.05 : (Math.random() - 0.5) * 0.15,
+    vy: layer === "far" ? 0.05 : 0.15
+  };
+}
+
+
 function resize(){
   const rect = stage.getBoundingClientRect();
   canvas.width = rect.width;
   canvas.height = rect.height;
   W = rect.width;
   H = rect.height;
-  stars.length = 0;
-  for(let i=0;i<200;i++){
-    stars.push({
-      x: Math.random()*W,
-      y: Math.random()*H,
-      r: Math.random()*1.5,
-      opacity: Math.random()
-    });
-  }
+
+  // reset sao
+  starsFar.length = 0;
+  starsNear.length = 0;
+
+  for (let i = 0; i < 120; i++) starsFar.push(createStar("far"));
+  for (let i = 0; i < 70; i++) starsNear.push(createStar("near"));
 }
-const stage = document.getElementById("stage");
+
+
+ 
+
+  
+
+
 
 resize();
 window.addEventListener("resize", resize);
@@ -108,7 +144,18 @@ window.addEventListener("resize", resize);
 /* --------------------- FIREWORK SYSTEM --------------------- */
 
 const particles=[];
+const rockets = [];
+
 function rand(a,b){return Math.random()*(b-a)+a;}
+function launchFirework(x) {
+  rockets.push({
+    x: x,
+    y: H + 10,        // bắt đầu từ dưới màn hình
+    vy: -rand(6, 9),  // bay lên
+    targetY: rand(H * 0.2, H * 0.45),
+    exploded: false
+  });
+}
 
 function spawnFirework(x,y,color){
   const count = 150;
@@ -138,28 +185,72 @@ function burstAroundText(){
 }
 
 function randomSkyFirework(){
-  spawnFirework(
-    rand(W*0.2,W*0.8),
-    rand(H*0.15,H*0.45),
-    ["#ffcc33","#ff5555","#ffaa00","#ffffff"][Math.floor(rand(0,4))]
-  );
+  launchFirework(rand(W * 0.2, W * 0.8));
 }
+
 function drawStars(){
-  for(let s of stars){
-    s.opacity += (Math.random()-0.5)*0.02; // nhấp nháy
-    if(s.opacity<0) s.opacity=0;
-    if(s.opacity>1) s.opacity=1;
+  for(let s of starsFar){
+    s.x += s.vx;
+    s.y += s.vy;
+
+    if(s.x < 0) s.x = W;
+    if(s.x > W) s.x = 0;
+    if(s.y > H) s.y = 0;
+
+    s.opacity += (Math.random()-0.5)*0.01;
+    s.opacity = Math.max(0, Math.min(1, s.opacity));
+
+    ctx.fillStyle = `rgba(180,200,255,${s.opacity})`;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  for(let s of starsNear){
+    s.x += s.vx;
+    s.y += s.vy;
+
+    if(s.x < 0) s.x = W;
+    if (s.x > W) s.x = -10;
+if (s.y > H) s.y = -10;
+
+
+    s.opacity += (Math.random()-0.5)*0.03;
+    s.opacity = Math.max(0, Math.min(1, s.opacity));
+
     ctx.fillStyle = `rgba(255,255,255,${s.opacity})`;
     ctx.beginPath();
-    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
     ctx.fill();
   }
 }
 
+
+
+
+
 function draw(){
-  ctx.fillStyle="rgba(0,0,0,0.28)";
-  ctx.fillRect(0,0,W,H);
+  ctx.clearRect(0, 0, W, H);
+
 drawStars();
+// Vẽ rocket bay lên
+for (let i = rockets.length - 1; i >= 0; i--) {
+  const r = rockets[i];
+  r.y += r.vy;
+
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(r.x, r.y, 2, 8);
+
+  if (r.y <= r.targetY && !r.exploded) {
+    spawnFirework(
+      r.x,
+      r.y,
+      ["#ffcc33", "#ff5555", "#ffaa00", "#ffffff"][Math.floor(rand(0,4))]
+    );
+    r.exploded = true;
+    rockets.splice(i, 1);
+  }
+}
   for(let i=particles.length-1;i>=0;i--){
     const p = particles[i];
     p.x+=p.vx;
@@ -180,9 +271,9 @@ draw();
 /* ---------------- TEXT SEQUENCE ---------------- */
 
 const messages = [
-  "CHÀO ĐÓN NHỮNG KHỞI ĐẦU MỚI",
-  "BÌNH AN",
-  "HẠNH PHÚC",
+  "BÌNH AN BẮT ĐẦU...", 
+  "YÊU THƯƠNG LAN TỎA...", 
+  "HẠNH PHÚC ĐONG ĐẦY...", 
   "HAPPY NEW YEAR 2026"
 ];
 
@@ -190,15 +281,28 @@ let index = 0;
 
 function showMessage(text){
   textBox.innerText = text;
+
+  // Nếu là dòng cuối → chữ to hơn
+  if (text.includes("2026")) {
+    textBox.style.fontSize = "2.2em";
+  } else {
+    textBox.style.fontSize = "1.6em";
+  }
+if(text.includes("2026")){
+  textBox.style.textShadow = "0 0 40px gold";
+}
+
   textBox.style.opacity = 0;
-  textBox.style.transform="translate(-50%,-50%) scale(.8)";
-  setTimeout(()=>{
+  textBox.style.transform = "translate(-50%,-50%) scale(.8)";
+
+  setTimeout(() => {
     textBox.style.opacity = 1;
-    textBox.style.transform="translate(-50%,-50%) scale(1)";
-  },60);
+    textBox.style.transform = "translate(-50%,-50%) scale(1)";
+  }, 60);
 
   burstAroundText();
 }
+
 
 function cycleMessages(){
   if(index>=messages.length) return;
